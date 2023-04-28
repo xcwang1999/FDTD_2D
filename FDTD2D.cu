@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iomanip>
 #include <cmath>
+#include <chrono>
 
 using namespace std;
 
@@ -150,6 +151,7 @@ int main(){
     dim3 grid_size((grid_row-1)/block_size.x + 1, (grid_col-1)/block_size.y + 1);
     // Main FDTD loop
     for(int time_step=1; time_step<=nsteps; time_step++){
+        auto start = std::chrono::high_resolution_clock::now();
 
         incident_Ez_values<<<(grid_col-1)/128+128, 128>>>(ez_inc_device, hx_inc_device);
 
@@ -173,9 +175,16 @@ int main(){
 
         incident_Hy<<<(grid_col-1) / 128 + 128, 128>>>(hy_device, ez_inc_device, ia, ib, ja, jb);
 
+        auto end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<float> duration = end - start;
+        ofstream outfile;
+        outfile.open("execution_time_GPU.txt", ios::app);
+        outfile << duration.count() << " ";
+        outfile.close();
+
         double *ez_host = (double *)malloc(sizeof(double)*grid_row*grid_col);
         cudaMemcpy(ez_host, ez_device, sizeof(double)*grid_row*grid_col, cudaMemcpyDeviceToHost);
-        ofstream outfile;
+
         outfile.open("data_cu.txt", ios::app);
         for(int i=0; i<grid_col; i++){
             for(int j=0; j<grid_row; j++){
