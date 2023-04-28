@@ -2,6 +2,7 @@
 #include <fstream>
 #include <iomanip>
 #include <cmath>
+#include <chrono>
 
 using namespace std;
 
@@ -88,6 +89,9 @@ int main(){
 
     // Main FDTD loop
     for(int time_step=1; time_step<=nsteps; time_step++){
+
+        auto start = std::chrono::high_resolution_clock::now();
+
         // Incident Ez values
         for(int j=1; j<grid_col; j++){
             ez_inc[j] = ez_inc[j] + 0.5 * (hx_inc[j-1] - hx_inc[j]);
@@ -139,7 +143,13 @@ int main(){
             hy[ib][j] = hy[ib][j] + 0.5 * ez_inc[j];
         }
 
+        auto end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<float> duration = end - start;
         ofstream outfile;
+        outfile.open("execution_time_CPU.txt", ios::app);
+        outfile << duration.count() << " ";
+        outfile.close();
+
         outfile.open("data_cpp.txt", ios::app);
         for(int i=0; i<grid_col; i++){
             for(int j=0; j<grid_row; j++){
