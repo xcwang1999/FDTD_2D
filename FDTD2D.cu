@@ -151,7 +151,11 @@ int main(){
     dim3 grid_size((grid_row-1)/block_size.x + 1, (grid_col-1)/block_size.y + 1);
     // Main FDTD loop
     for(int time_step=1; time_step<=nsteps; time_step++){
-        auto start = std::chrono::high_resolution_clock::now();
+        cudaEvent_t start, stop;
+        cudaEventCreate(&start);
+        cudaEventCreate(&stop);
+        cudaEventRecord(start);
+        cudaEventQuery(start);
 
         incident_Ez_values<<<(grid_col-1)/128+128, 128>>>(ez_inc_device, hx_inc_device);
 
@@ -174,14 +178,16 @@ int main(){
         calculate_Hy<<<block_size, grid_size>>>(ez_device, hy_device, ihy_device, fi2_device, fi3_device, fj1_device);
 
         incident_Hy<<<(grid_col-1) / 128 + 128, 128>>>(hy_device, ez_inc_device, ia, ib, ja, jb);
-
-        auto end = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<float> duration = end - start;
+      
+        cudaEventRecord(stop);
+        cudaEventSynchronize(stop);
+        float elapsed_time;
+        cudaEventElapsedTime(&elapsed_time, start, stop);
         ofstream outfile;
         outfile.open("execution_time_GPU.txt", ios::app);
-        outfile << duration.count() << " ";
+        outfile << elapsed_time/1000 << " ";
         outfile.close();
-
+      
         double *ez_host = (double *)malloc(sizeof(double)*grid_row*grid_col);
         cudaMemcpy(ez_host, ez_device, sizeof(double)*grid_row*grid_col, cudaMemcpyDeviceToHost);
 
