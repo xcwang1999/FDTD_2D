@@ -35,34 +35,35 @@ int main(){
 
     const double epsz = 8.854e-12;
 
-    double gaz[grid_row][grid_col] = {};
-    double gbz[grid_row][grid_col] = {};
+    double *gaz = new double [grid_row*grid_col];
+    double *gbz = new double [grid_row*grid_col];
 
-    double ez[grid_row][grid_col] = {};
-    double dz[grid_row][grid_col] = {};
-    double hx[grid_row][grid_col] = {};
-    double hy[grid_row][grid_col] = {};
+    double *ez = new double [grid_row*grid_col];
+    double *dz = new double [grid_row*grid_col];
+    double *hx = new double [grid_row*grid_col];
+    double *hy = new double [grid_row*grid_col];
 
-    double iz[grid_row][grid_col] = {};
-    double ihx[grid_row][grid_col] = {};
-    double ihy[grid_row][grid_col] = {};
-    double ez_inc[grid_col] = {};
-    double hx_inc[grid_col] = {};
+    double *iz = new double [grid_row*grid_col];
+    double *ihx = new double [grid_row*grid_col];
+    double *ihy = new double [grid_row*grid_col];
+    double *ez_inc = new double [grid_col];
+    double *hx_inc = new double [grid_col];
+
 
     // PML parameters
     const int npml = 10;
     double boundary_low[] = {0, 0};
     double boundary_high[] = {0, 0};
-    double gi2[grid_row] = {};
-    double gi3[grid_row] = {};
-    double fi1[grid_row] = {};
-    double fi2[grid_row] = {};
-    double fi3[grid_row] = {};
-    double gj2[grid_col] = {};
-    double gj3[grid_col] = {};
-    double fj1[grid_col] = {};
-    double fj2[grid_col] = {};
-    double fj3[grid_col] = {};
+    double *gi2 = new double [grid_row];
+    double *gi3 = new double [grid_row];
+    double *fi1 = new double [grid_row];
+    double *fi2 = new double [grid_row];
+    double *fi3 = new double [grid_row];
+    double *gj2 = new double [grid_col];
+    double *gj3 = new double [grid_col];
+    double *fj1 = new double [grid_col];
+    double *fj2 = new double [grid_col];
+    double *fj3 = new double [grid_col];
 
     // Dielectric area parameter
     const double epsr = 30;
@@ -116,8 +117,8 @@ int main(){
 
         // Incident Dz values
         for(int i=ia; i<=ib; i++){
-            dz[i][ja] = dz[i][ja] + 0.5 * hx_inc[ja-1];
-            dz[i][jb] = dz[i][jb] - 0.5 * hx_inc[jb];
+            dz[i*grid_col+ja] = dz[i*grid_col+ja] + 0.5 * hx_inc[ja-1];
+            dz[i*grid_col+jb] = dz[i*grid_col+jb] - 0.5 * hx_inc[jb];
         }
 
         calculateEz((double *)ez, (double *)dz, (double *)gaz, (double *)gbz, (double *)iz);
@@ -131,16 +132,16 @@ int main(){
 
         // Incident Hx values
         for (int i=ia; i<=ib; i++) {
-            hx[i][ja-1] = hx[i][ja-1] + 0.5 * ez_inc[ja];
-            hx[i][jb] = hx[i][jb] - 0.5 * ez_inc[jb];
+            hx[i*grid_col+ja-1] = hx[i*grid_col+ja-1] + 0.5 * ez_inc[ja];
+            hx[i*grid_col+jb] = hx[i*grid_col+jb] - 0.5 * ez_inc[jb];
         }
 
         calculateHy((double *)ez, (double *)hy, (double *)ihy, fi2, fi3, fj1);
 
         // Incident Hy value
         for (int j=ja; j<=jb; j++) {
-            hy[ia-1][j] = hy[ia-1][j] - 0.5 * ez_inc[j];
-            hy[ib][j] = hy[ib][j] + 0.5 * ez_inc[j];
+            hy[(ia-1)*grid_col+j] = hy[(ia-1)*grid_col+j] - 0.5 * ez_inc[j];
+            hy[ib*grid_col+j] = hy[ib*grid_col+j] + 0.5 * ez_inc[j];
         }
 
         auto end = std::chrono::high_resolution_clock::now();
@@ -154,14 +155,36 @@ int main(){
         for(int i=0; i<grid_col; i++){
             for(int j=0; j<grid_row; j++){
                 if(j!=grid_row-1){
-                    outfile << setprecision(4) << fixed << ez[i][j] << " ";
+                    outfile << setprecision(4) << fixed << ez[i*grid_col+j] << " ";
                 } else{
-                    outfile << setprecision(4) << fixed << ez[i][j] << endl;
+                    outfile << setprecision(4) << fixed << ez[i*grid_col+j] << endl;
                 }
             }
         }
         outfile.close();
     }
+
+    delete[] gaz;
+    delete[] gbz;
+    delete[] ez;
+    delete[] dz;
+    delete[] hx;
+    delete[] hy;
+    delete[] iz;
+    delete[] ihx;
+    delete[] ihy;
+    delete[] ez_inc;
+    delete[] hx_inc;
+    delete[] gi2;
+    delete[] gi3;
+    delete[] fi1;
+    delete[] fi2;
+    delete[] fi3;
+    delete[] gj2;
+    delete[] gj3;
+    delete[] fj1;
+    delete[] fj2;
+    delete[] fj3;
 
     return 0;
 }
