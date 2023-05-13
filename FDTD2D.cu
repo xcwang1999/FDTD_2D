@@ -6,8 +6,8 @@
 
 using namespace std;
 
-#define grid_row 200
-#define grid_col 200
+#define grid_row 400
+#define grid_col 400
 
 void initialize_parameters(double *gaz, double *gi2, double *gi3, double *fi2,
                            double *fi3, double *gj2, double *gj3, double *fj2,
@@ -42,39 +42,39 @@ int main(){
 
     const double epsz = 8.854e-12;
 
-    double gaz[grid_row][grid_col] = {};
-    double gbz[grid_row][grid_col] = {};
+    double *gaz = new double [grid_row*grid_col];
+    double *gbz = new double [grid_row*grid_col];
 
-    double ez[grid_row][grid_col] = {};
-    double dz[grid_row][grid_col] = {};
-    double hx[grid_row][grid_col] = {};
-    double hy[grid_row][grid_col] = {};
+    double *ez = new double [grid_row*grid_col];
+    double *dz = new double [grid_row*grid_col];
+    double *hx = new double [grid_row*grid_col];
+    double *hy = new double [grid_row*grid_col];
 
-    double iz[grid_row][grid_col] = {};
-    double ihx[grid_row][grid_col] = {};
-    double ihy[grid_row][grid_col] = {};
-    double ez_inc[grid_col] = {};
-    double hx_inc[grid_col] = {};
+    double *iz = new double [grid_row*grid_col];
+    double *ihx = new double [grid_row*grid_col];
+    double *ihy = new double [grid_row*grid_col];
+    double *ez_inc = new double [grid_col];
+    double *hx_inc = new double [grid_col];
 
     // PML parameters
     const int npml = 10;
     double boundary_low[] = {0, 0};
     double boundary_high[] = {0, 0};
-    double gi2[grid_row] = {};
-    double gi3[grid_row] = {};
-    double fi1[grid_row] = {};
-    double fi2[grid_row] = {};
-    double fi3[grid_row] = {};
-    double gj2[grid_col] = {};
-    double gj3[grid_col] = {};
-    double fj1[grid_col] = {};
-    double fj2[grid_col] = {};
-    double fj3[grid_col] = {};
+    double *gi2 = new double [grid_row];
+    double *gi3 = new double [grid_row];
+    double *fi1 = new double [grid_row];
+    double *fi2 = new double [grid_row];
+    double *fi3 = new double [grid_row];
+    double *gj2 = new double [grid_col];
+    double *gj3 = new double [grid_col];
+    double *fj1 = new double [grid_col];
+    double *fj2 = new double [grid_col];
+    double *fj3 = new double [grid_col];
 
     // Dielectric area parameter
     const double epsr = 30;
     const double sigma = 0.3;
-    const double radius = 5;
+    const double radius = 10;
     pair<int,int>centers[] = {
         {50, 50}, {50, 100}, {50, 150},
         {100, 50}, {100, 100}, {100, 150},
@@ -178,7 +178,7 @@ int main(){
         calculate_Hy<<<block_size, grid_size>>>(ez_device, hy_device, ihy_device, fi2_device, fi3_device, fj1_device);
 
         incident_Hy<<<(grid_col-1) / 128 + 128, 128>>>(hy_device, ez_inc_device, ia, ib, ja, jb);
-      
+
         cudaEventRecord(stop);
         cudaEventSynchronize(stop);
         float elapsed_time;
@@ -187,7 +187,7 @@ int main(){
         outfile.open("execution_time_GPU.txt", ios::app);
         outfile << elapsed_time/1000 << " ";
         outfile.close();
-      
+
         double *ez_host = (double *)malloc(sizeof(double)*grid_row*grid_col);
         cudaMemcpy(ez_host, ez_device, sizeof(double)*grid_row*grid_col, cudaMemcpyDeviceToHost);
 
@@ -227,6 +227,28 @@ int main(){
     cudaFree(fj3_device);
     cudaFree(boundary_low_device);
     cudaFree(boundary_high_device);
+
+    delete[] gaz;
+    delete[] gbz;
+    delete[] ez;
+    delete[] dz;
+    delete[] hx;
+    delete[] hy;
+    delete[] iz;
+    delete[] ihx;
+    delete[] ihy;
+    delete[] ez_inc;
+    delete[] hx_inc;
+    delete[] gi2;
+    delete[] gi3;
+    delete[] fi1;
+    delete[] fi2;
+    delete[] fi3;
+    delete[] gj2;
+    delete[] gj3;
+    delete[] fj1;
+    delete[] fj2;
+    delete[] fj3;
     return 0;
 }
 void initialize_parameters(double *gaz, double *gi2, double *gi3, double *fi2,
