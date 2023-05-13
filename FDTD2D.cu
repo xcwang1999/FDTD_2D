@@ -6,8 +6,8 @@
 
 using namespace std;
 
-#define grid_row 400
-#define grid_col 400
+#define grid_row 200
+#define grid_col 200
 
 void initialize_parameters(double *gaz, double *gi2, double *gi3, double *fi2,
                            double *fi3, double *gj2, double *gj3, double *fj2,
