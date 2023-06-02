@@ -98,29 +98,29 @@ int main(){
             *gj2_device, *gj3_device, *fj1_device, *fj2_device, *fj3_device;
     double *boundary_low_device, *boundary_high_device;
 
-    cudaMalloc((double **)&ez_device, sizeof(double)*grid_row*grid_col);
-    cudaMalloc((double **)&dz_device, sizeof(double)*grid_row*grid_col);
-    cudaMalloc((double **)&hx_device, sizeof(double)*grid_row*grid_col);
-    cudaMalloc((double **)&hy_device, sizeof(double)*grid_row*grid_col);
-    cudaMalloc((double **)&iz_device, sizeof(double)*grid_row*grid_col);
-    cudaMalloc((double **)&ihx_device, sizeof(double)*grid_row*grid_col);
-    cudaMalloc((double **)&ihy_device, sizeof(double)*grid_row*grid_col);
-    cudaMalloc((double **)&ez_inc_device, sizeof(double)*grid_col);
-    cudaMalloc((double **)&hx_inc_device, sizeof(double)*grid_col);
-    cudaMalloc((double **)&gaz_device, sizeof(double)*grid_row*grid_col);
-    cudaMalloc((double **)&gbz_device, sizeof(double)*grid_row*grid_col);
-    cudaMalloc((double **)&gi2_device, sizeof(double)*grid_row);
-    cudaMalloc((double **)&gi3_device, sizeof(double)*grid_row);
-    cudaMalloc((double **)&fi1_device, sizeof(double)*grid_row);
-    cudaMalloc((double **)&fi2_device, sizeof(double)*grid_row);
-    cudaMalloc((double **)&fi3_device, sizeof(double)*grid_row);
-    cudaMalloc((double **)&gj2_device, sizeof(double)*grid_col);
-    cudaMalloc((double **)&gj3_device, sizeof(double)*grid_col);
-    cudaMalloc((double **)&fj1_device, sizeof(double)*grid_col);
-    cudaMalloc((double **)&fj2_device, sizeof(double)*grid_col);
-    cudaMalloc((double **)&fj3_device, sizeof(double)*grid_col);
-    cudaMalloc((double **)&boundary_low_device, sizeof(double)*2);
-    cudaMalloc((double **)&boundary_high_device, sizeof(double)*2);
+    cudaMalloc((void **)&ez_device, sizeof(double)*grid_row*grid_col);
+    cudaMalloc((void **)&dz_device, sizeof(double)*grid_row*grid_col);
+    cudaMalloc((void **)&hx_device, sizeof(double)*grid_row*grid_col);
+    cudaMalloc((void **)&hy_device, sizeof(double)*grid_row*grid_col);
+    cudaMalloc((void **)&iz_device, sizeof(double)*grid_row*grid_col);
+    cudaMalloc((void **)&ihx_device, sizeof(double)*grid_row*grid_col);
+    cudaMalloc((void **)&ihy_device, sizeof(double)*grid_row*grid_col);
+    cudaMalloc((void **)&ez_inc_device, sizeof(double)*grid_col);
+    cudaMalloc((void **)&hx_inc_device, sizeof(double)*grid_col);
+    cudaMalloc((void **)&gaz_device, sizeof(double)*grid_row*grid_col);
+    cudaMalloc((void **)&gbz_device, sizeof(double)*grid_row*grid_col);
+    cudaMalloc((void **)&gi2_device, sizeof(double)*grid_row);
+    cudaMalloc((void **)&gi3_device, sizeof(double)*grid_row);
+    cudaMalloc((void **)&fi1_device, sizeof(double)*grid_row);
+    cudaMalloc((void **)&fi2_device, sizeof(double)*grid_row);
+    cudaMalloc((void **)&fi3_device, sizeof(double)*grid_row);
+    cudaMalloc((void **)&gj2_device, sizeof(double)*grid_col);
+    cudaMalloc((void **)&gj3_device, sizeof(double)*grid_col);
+    cudaMalloc((void **)&fj1_device, sizeof(double)*grid_col);
+    cudaMalloc((void **)&fj2_device, sizeof(double)*grid_col);
+    cudaMalloc((void **)&fj3_device, sizeof(double)*grid_col);
+    cudaMalloc((void **)&boundary_low_device, sizeof(double)*2);
+    cudaMalloc((void **)&boundary_high_device, sizeof(double)*2);
 
     cudaMemcpy(ez_device, ez, sizeof(double)*grid_row*grid_col, cudaMemcpyHostToDevice);
     cudaMemcpy(dz_device, dz, sizeof(double)*grid_row*grid_col, cudaMemcpyHostToDevice);
@@ -157,7 +157,7 @@ int main(){
         cudaEventRecord(start);
         cudaEventQuery(start);
 
-        incident_Ez_values<<<(grid_col-1)/128+128, 128>>>(ez_inc_device, hx_inc_device);
+        incident_Ez_values<<<(grid_col-1)/128+1, 128>>>(ez_inc_device, hx_inc_device);
 
         absorbing_boundary_condition<<<1, 1>>>(ez_inc_device, boundary_low_device, boundary_high_device);
 
@@ -165,19 +165,19 @@ int main(){
 
         inject_source<<<1, 1>>>(ez_inc_device, pulse, t0, spread, time_step);
 
-        incident_Dz<<<(grid_row-1)/128+128, 128>>>(dz_device, hx_inc_device, ia, ib, ja, jb);
+        incident_Dz<<<(grid_row-1)/128+1, 128>>>(dz_device, hx_inc_device, ia, ib, ja, jb);
 
         calculate_Ez<<<block_size, grid_size>>>(ez_device, dz_device, gaz_device, gbz_device, iz_device);
 
-        calculate_incident_Hx<<<(grid_col-1) / 128 + 128, 128>>>(hx_inc_device, ez_inc_device);
+        calculate_incident_Hx<<<(grid_col-1)/128 + 1, 128>>>(hx_inc_device, ez_inc_device);
 
         calculate_Hx<<<block_size, grid_size>>>(ez_device, ihx_device, hx_device, fi1_device, fj2_device, fj3_device);
 
-        incident_Hx<<<(grid_row-1) / 128 + 128, 128>>>(hx_device, ez_inc_device, ia, ib, ja, jb);
+        incident_Hx<<<(grid_row-1)/128 + 1, 128>>>(hx_device, ez_inc_device, ia, ib, ja, jb);
 
         calculate_Hy<<<block_size, grid_size>>>(ez_device, hy_device, ihy_device, fi2_device, fi3_device, fj1_device);
 
-        incident_Hy<<<(grid_col-1) / 128 + 128, 128>>>(hy_device, ez_inc_device, ia, ib, ja, jb);
+        incident_Hy<<<(grid_col-1)/128 + 1, 128>>>(hy_device, ez_inc_device, ia, ib, ja, jb);
 
         cudaEventRecord(stop);
         cudaEventSynchronize(stop);
