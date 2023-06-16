@@ -6,8 +6,8 @@
 
 using namespace std;
 
-#define grid_row 200
-#define grid_col 200
+const int grid_row = 200;
+const int grid_col = 200;
 
 void initialize_parameters(double *gaz, double *gi2, double *gi3, double *fi2,
                            double *fi3, double *gj2, double *gj3, double *fj2,
@@ -147,8 +147,8 @@ int main(){
     cudaMemcpy(boundary_high_device, boundary_high, sizeof(double)*2, cudaMemcpyHostToDevice);
 
     const int nsteps = 2000;
-    dim3 block_size(128, 128);
-    dim3 grid_size((grid_row-1)/block_size.x + 1, (grid_col-1)/block_size.y + 1);
+    dim3 block_size(32, 32);
+    dim3 grid_size((grid_col-1)/block_size.x + 1, (grid_row-1)/block_size.y + 1);
     // Main FDTD loop
     for(int time_step=1; time_step<=nsteps; time_step++){
         cudaEvent_t start, stop;
