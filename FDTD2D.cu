@@ -161,21 +161,21 @@ int main(){
 
         absorbing_boundary_condition<<<1, 1>>>(ez_inc_device, boundary_low_device, boundary_high_device);
 
-        calculate_Dz<<<block_size, grid_size>>>(dz_device, hx_device, hy_device, gi3_device, gj3_device, gi2_device, gj2_device);
+        calculate_Dz<<<grid_size, block_size>>>(dz_device, hx_device, hy_device, gi3_device, gj3_device, gi2_device, gj2_device);
 
         inject_source<<<1, 1>>>(ez_inc_device, pulse, t0, spread, time_step);
 
         incident_Dz<<<(grid_row-1)/128+1, 128>>>(dz_device, hx_inc_device, ia, ib, ja, jb);
 
-        calculate_Ez<<<block_size, grid_size>>>(ez_device, dz_device, gaz_device, gbz_device, iz_device);
+        calculate_Ez<<<grid_size, block_size>>>(ez_device, dz_device, gaz_device, gbz_device, iz_device);
 
         calculate_incident_Hx<<<(grid_col-1)/128 + 1, 128>>>(hx_inc_device, ez_inc_device);
 
-        calculate_Hx<<<block_size, grid_size>>>(ez_device, ihx_device, hx_device, fi1_device, fj2_device, fj3_device);
+        calculate_Hx<<<grid_size, block_size>>>(ez_device, ihx_device, hx_device, fi1_device, fj2_device, fj3_device);
 
         incident_Hx<<<(grid_row-1)/128 + 1, 128>>>(hx_device, ez_inc_device, ia, ib, ja, jb);
 
-        calculate_Hy<<<block_size, grid_size>>>(ez_device, hy_device, ihy_device, fi2_device, fi3_device, fj1_device);
+        calculate_Hy<<<grid_size, block_size>>>(ez_device, hy_device, ihy_device, fi2_device, fi3_device, fj1_device);
 
         incident_Hy<<<(grid_col-1)/128 + 1, 128>>>(hy_device, ez_inc_device, ia, ib, ja, jb);
 
