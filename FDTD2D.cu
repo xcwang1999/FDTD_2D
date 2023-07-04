@@ -188,21 +188,23 @@ int main(){
         outfile << elapsed_time/1000 << " ";
         outfile.close();
 
-        double *ez_host = (double *)malloc(sizeof(double)*grid_row*grid_col);
-        cudaMemcpy(ez_host, ez_device, sizeof(double)*grid_row*grid_col, cudaMemcpyDeviceToHost);
+//        if(time_step%250==0){
+            double *ez_host = (double *)malloc(sizeof(double)*grid_row*grid_col);
+            cudaMemcpy(ez_host, ez_device, sizeof(double)*grid_row*grid_col, cudaMemcpyDeviceToHost);
 
-        outfile.open("data_cu.txt", ios::app);
-        for(int i=0; i<grid_col; i++){
-            for(int j=0; j<grid_row; j++){
-                if(j!=grid_row-1){
-                    outfile << setprecision(4) << fixed << ez_host[i*grid_col+j] << " ";
-                } else{
-                    outfile << setprecision(4) << fixed << ez_host[i*grid_col+j] << endl;
+            outfile.open("data_cu.txt", ios::app);
+            for(int i=0; i<grid_col; i++){
+                for(int j=0; j<grid_row; j++){
+                    if(j!=grid_row-1){
+                        outfile << setprecision(4) << fixed << ez_host[i*grid_col+j] << " ";
+                    } else{
+                        outfile << setprecision(4) << fixed << ez_host[i*grid_col+j] << endl;
+                    }
                 }
             }
-        }
-        outfile.close();
-        free(ez_host);
+            outfile.close();
+            free(ez_host);
+//        }
     }
     cudaFree(ez_device);
     cudaFree(dz_device);

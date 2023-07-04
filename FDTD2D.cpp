@@ -151,17 +151,17 @@ int main(){
         outfile << duration.count() << " ";
         outfile.close();
 
-        outfile.open("data_cpp.txt", ios::app);
-        for(int i=0; i<grid_col; i++){
-            for(int j=0; j<grid_row; j++){
-                if(j!=grid_row-1){
-                    outfile << setprecision(4) << fixed << ez[i*grid_col+j] << " ";
-                } else{
-                    outfile << setprecision(4) << fixed << ez[i*grid_col+j] << endl;
-                }
-            }
-        }
-        outfile.close();
+//        outfile.open("data_cpp.txt", ios::app);
+//        for(int i=0; i<grid_col; i++){
+//            for(int j=0; j<grid_row; j++){
+//                if(j!=grid_row-1){
+//                    outfile << setprecision(4) << fixed << ez[i*grid_col+j] << " ";
+//                } else{
+//                    outfile << setprecision(4) << fixed << ez[i*grid_col+j] << endl;
+//                }
+//            }
+//        }
+//        outfile.close();
     }
 
     delete[] gaz;
