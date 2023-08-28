@@ -37,7 +37,7 @@ int main(){
     const int ja = 10;
     const int jb = grid_col - ja - 1;
 
-    const double delta_x = 0.0001;
+    const double delta_x = 0.01;
     const double delta_t = delta_x / 6e8;
 
     const double epsz = 8.854e-12;
@@ -82,8 +82,8 @@ int main(){
     };
 
     // pulse parameters
-    const int t0 = 20;
-    const int spread = 8;
+    const double t0 = 20;
+    const double spread = 8;
     double pulse = 0;
 
     initialize_parameters((double *)gaz, gi2, gi3, fi2,
